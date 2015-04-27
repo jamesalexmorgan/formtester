@@ -1,3 +1,29 @@
+function createCookie(name,value,days) {
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime()+(days*24*60*60*1000));
+        var expires = "; expires="+date.toGMTString();
+    }
+    else var expires = "";
+    document.cookie = name+"="+value+expires+"; path=/";
+}
+
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+
+function eraseCookie(name) {
+    createCookie(name,"",-1);
+}
+
+
 //NEED CUSTOM STRINGIFY FUNCTION because JSON.stringify doesn't save functions
 var stringify = function(obj, prop) {
   var placeholder = '____PLACEHOLDER____';
@@ -18,7 +44,7 @@ var stringify = function(obj, prop) {
 
 var loc = document.location;
 var m = {
-  initDelay: 3,
+  initDelay: 4,
   actionStepDelay: 0.2,
   storage: null,
   data: { //this data object will be what is stored and retrieved
@@ -52,6 +78,8 @@ var m = {
     } else {
       //viewing another page
       m.storage = sessionStorage.getItem('form-test');//try getting storage
+      // m.storage = $.cookie('form-test');
+      // m.storage = readCookie('form-test');
 
       if(m.storage){
         //storage found so init control bar
@@ -69,7 +97,7 @@ var m = {
 
   initControlBar: function(testScenarios) {
     if(!m.ui.$controlBar) {
-      var cssHtml = '<style>#form-testing-bar {overflow:auto;box-sizing: border-box;position: fixed;top: 0;left: 0;z-index: 1000000000;background: #ccc;width: 100%;padding: 10px;color: #555;} #form-testing-bar .test-form-box {width: 33%; float:left;} #form-testing-bar select,#form-testing-bar button  {padding: 4px;margin: 0;vertical-align: middle;}</style>';
+      var cssHtml = '<style>body {padding-top:150px !important;} #form-testing-bar {overflow:auto;box-sizing: border-box;position: fixed;top: 0;left: 0;z-index: 1000000000;background: #ccc;width: 100%;padding: 10px;color: #555;} #form-testing-bar .test-form-box {width: 33%; float:left;} #form-testing-bar select,#form-testing-bar button  {padding: 4px;margin: 0;vertical-align: middle;}</style>';
       m.ui.$controlBar = $('<div id="form-testing-bar"></div>');
       $('body').prepend(cssHtml);
       $('body').prepend(m.ui.$controlBar);  
@@ -184,6 +212,9 @@ var m = {
 
   save: function() {
     // save data into storage
+    var stringData = stringify(m.data);
+    // $.cookie('form-test', stringData);
+    // createCookie('form-test',stringData,7);
     sessionStorage.setItem('form-test', stringify(m.data));
   },
   continueTest: function() {
@@ -228,11 +259,12 @@ var m = {
         var func = function(test, count) {
           m.runAction(test.actions[count], test, count, function(count) {
             count++;
-       console.log(count+' of '+m.actionsPrepared.length);
+            console.log(count+' of '+m.actionsPrepared.length);
             window.setTimeout(function() {
               if(m.actionsPrepared[count]) {
                 m.actionsPrepared[count](test, count);
               } else {
+                //no more actions in this test
                 if(m.finishingAfterThisTest){
                   m.finish();
                 } else {
@@ -240,8 +272,11 @@ var m = {
                     m.data.currentScenarioIndex++;
                     m.data.currentTestIndex = 0;
                   }
-                  // var nextTest = m.data.runningTestScenarios[m.data.currentScenarioIndex].tests[m.data.currentTestIndex];
-                  //m.executeTest(nextTest);
+                  window.setTimeout(function(){
+                    //give it a timer, in case there is no submit at the end of a scenario
+                    var nextTest = m.data.runningTestScenarios[m.data.currentScenarioIndex].tests[m.data.currentTestIndex];
+                    m.executeTest(nextTest);
+                  }, m.initDelay * 1000);
                   m.save();
                 }
               }
@@ -250,7 +285,7 @@ var m = {
         }
         m.actionsPrepared.push(func);
       });
-
+      
       m.actionsPrepared[0](test,count);//begin first action
     } else {
       // console.log('No actions');
@@ -313,7 +348,7 @@ var m = {
     m.resetValues();
   },
   printResults: function() {
-    var $resultsWrapper = $('<div class="test-results-wrapper"><h2>Results</h2></div>');
+    var $resultsWrapper = $('<div class="test-results-wrapper test-form-box"><h2>Results</h2></div>');
     var $results = $('<div class="test-results" style="display:none;"></div>');
     var $resultsBtn = $('<button class="test-results-button">Show</button>');
 
