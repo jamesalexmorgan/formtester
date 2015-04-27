@@ -40,15 +40,15 @@ var testScenarios = [
                     "type": "assert",
                     "selector": "#section-header-account-details",
                     "value": "1. Account details"
-      },{
+            },{
                    "selector": "#user_0_419",
                    "type": "set",
-                   "value": "test%globals_date_YmdH%@mailinator.com"
+                   "value": "test%globals_date_YmdHs%@mailinator.com"
                   },
                   {
                    "selector": "#emailConfirm",
                    "type": "set",
-                   "value": "test%globals_date_YmdH%@mailinator.com"
+                   "value": "test%globals_date_YmdHs%@mailinator.com"
                   },
                   {
                    "selector": "#user_0_420_one",
@@ -98,7 +98,7 @@ var testScenarios = [
                   {
                    "type": "set",
                    "selector": "#SQ_LOGIN_USERNAME",
-                   "value": "test%globals_date_YmdH%@mailinator.com"
+                   "value": "test%globals_date_YmdHs%@mailinator.com"
                   },
                   {
                    "type": "set",
@@ -116,7 +116,7 @@ var testScenarios = [
                         {
                             "type": "assert",
                 "selector": "#logged-in-user",
-                "value": "Logged in as: <strong>test%globals_date_YmdH%@mailinator.com</strong>"
+                "value": "Logged in as: <strong>test%globals_date_YmdHs%@mailinator.com</strong>"
                   }
                 ]
             }
